@@ -1,0 +1,81 @@
+---
+- name: Setup Raspberry Pi Camera Systemd Job
+  hosts: raspberrypi
+  become: yes
+  become_method: sudo  # Explicitly set sudo
+  become_user: root  # Run as root
+
+  vars:
+    nfs_server: "{{ nas_ip }}"
+    nfs_mount_point: "/mnt/nas"
+    nas_share: "/mnt/user/pipic-{{ env | default('dev') }}"
+    script_dest: "/usr/local/bin/pipic.py"
+    logstash_host: "10.7.0.5"
+    systemd_dir: "/etc/systemd/system"
+
+  tasks:
+
+    - name: Install required system packages
+      apt:
+        name:
+          - python3-pip
+          - libcamera-apps
+          - nfs-common
+          - cron
+        update_cache: yes
+
+    - name: Install required Python packages
+      pip:
+        name:
+          - picamera2
+          - click
+          - python-json-logger
+          - graypy
+        executable: pip3
+
+    - name: Create NFS mount directory
+      file:
+        path: "{{ nfs_mount_point }}"
+        state: directory
+        mode: '0755'
+
+    - name: Mount NFS share
+      mount:
+        path: "{{ nfs_mount_point }}"
+        src: "{{ nfs_server }}:{{ nas_share }}"
+        fstype: nfs
+        opts: defaults,_netdev
+        state: mounted
+
+    - name: Ensure NFS entry in /etc/fstab
+      lineinfile:
+        path: /etc/fstab
+        line: "{{ nfs_server }}:{{ nas_share }} {{ nfs_mount_point }} nfs defaults,_netdev 0 0"
+        state: present
+
+    - name: Deploy pipic script
+      copy:
+        src: files/pipic.py
+        dest: "{{ script_dest }}"
+        mode: '0755'
+
+    - name: Deploy systemd service unit
+      copy:
+        src: files/pipic.service
+        dest: "{{ systemd_dir }}/pipic.service"
+        mode: '0644'
+
+    - name: Deploy systemd timer unit
+      copy:
+        src: files/pipic.timer
+        dest: "{{ systemd_dir }}/pipic.timer"
+        mode: '0644'
+
+    - name: Reload systemd
+      command: systemctl daemon-reload
+
+    - name: Enable and start pipic.timer
+      systemd:
+        name: pipic.timer
+        enabled: yes
+        state: started

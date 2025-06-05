@@ -1,0 +1,8 @@
+[Unit]
+Description=Capture image and upload to NFS
+After=network-online.target remote-fs.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/usr/bin/python3 /usr/local/bin/pipic.py --nfs --logstash-host 10.7.0.100
+User=nicholas
