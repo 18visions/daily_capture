@@ -1,6 +1,6 @@
 ---
 - name: Setup Raspberry Pi Camera Systemd Job
-  hosts: raspberrypi
+  hosts: pizero
   become: yes
   become_method: sudo  # Explicitly set sudo
   become_user: root  # Run as root
