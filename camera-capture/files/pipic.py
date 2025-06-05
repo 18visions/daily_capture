@@ -53,7 +53,7 @@ class PiCameraUploader:
         self.logger.info("Image captured", extra={"image_path": self.image_path})
         return self.image_path
 
-    def copy_to_nfs(self, mount_point="/mnt/nfs"):
+    def copy_to_nfs(self, mount_point="/mnt/nas"):
         if not os.path.ismount(mount_point):
             self.logger.error("NFS mount not found", extra={"mount_point": mount_point})
             raise RuntimeError(f"{mount_point} is not mounted")
