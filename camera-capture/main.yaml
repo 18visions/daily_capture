@@ -32,6 +32,7 @@
           - python-json-logger
           - graypy
         executable: pip3
+        extra_args: --break-system-packages
 
     - name: Create NFS mount directory
       file:
