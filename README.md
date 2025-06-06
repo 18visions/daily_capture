@@ -54,7 +54,7 @@ camera-capture/
 ### 4. Script Usage
 The script can be run manually:
    ```sh
-   python3 [pipic.py](http://_vscodecontentref_/4) --nfs --logstash-host <logstash_ip>
+   python3 pipic.py --nfs --logstash-host <logstash_ip>
    ```
 
 #### Options:
